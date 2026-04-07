@@ -92,5 +92,9 @@ def main():
     print(f"3. Оптимизированный: {t_opt:.4f} сек, {p_opt:.2f} MFlops ({ratio:.1f}% от BLAS)")
 
 main()
+print('Автор: Кочаров Арсений Андрееевич, группа: 090301-ПОВа-о25')
 
 ```
+## Результат выполнения программы:
+Мой процессор позволяет выдать результат больше 10%
+<img width="1103" height="168" alt="image" src="https://github.com/user-attachments/assets/8312cef6-d233-486c-86a6-3c5cd09320fd" />
