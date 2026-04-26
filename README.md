@@ -16,7 +16,7 @@
 import time
 from numba import jit, prange
 import scipy.linalg.blas as blas
-
+import np as np
 # 1. Наивное перемножение (512x512)
 def naive_mult(A, B):
     n = A.shape[0]
@@ -57,41 +57,38 @@ def optimized_mult(A, B):
                             C[i, j] += a_val * B[k, j]
     return C
 
-def main():
-    np.random.seed(42)
+np.random.seed(42)
     
-    # 1. Наивный метод (512x512)
-    n_small = 512
-    A = np.random.rand(n_small, n_small).astype(np.float32)
-    B = np.random.rand(n_small, n_small).astype(np.float32)
+# 1. Наивный метод (512x512)
+n_small = 512
+A = np.random.rand(n_small, n_small).astype(np.float32)
+B = np.random.rand(n_small, n_small).astype(np.float32)
     
-    start = time.time()
-    naive_mult(A, B)
-    t_naive = time.time() - start
-    print(f"1. Наивный: {t_naive:.2f} сек, {2*n_small**3/t_naive/1e6:.2f} MFlops")
+start = time.time()
+naive_mult(A, B)
+t_naive = time.time() - start
+print(f"1. Наивный: {t_naive:.2f} сек, {2*n_small**3/t_naive/1e6:.2f} MFlops")
 
-    # 2. BLAS (2048x2048)
-    n_large = 2048
-    A = np.random.rand(n_large, n_large).astype(np.float32)
-    B = np.random.rand(n_large, n_large).astype(np.float32)
+# 2. BLAS (2048x2048)
+n_large = 2048
+A = np.random.rand(n_large, n_large).astype(np.float32)
+B = np.random.rand(n_large, n_large).astype(np.float32)
     
-    start = time.time()
-    blas_mult(A, B)
-    t_blas = time.time() - start
-    p_blas = 2*n_large**3/t_blas/1e6
-    print(f"2. BLAS: {t_blas:.4f} сек, {p_blas:.2f} MFlops")
+start = time.time()
+blas_mult(A, B)
+t_blas = time.time() - start
+p_blas = 2*n_large**3/t_blas/1e6
+print(f"2. BLAS: {t_blas:.4f} сек, {p_blas:.2f} MFlops")
 
-    # 3. Оптимизированный (2048x2048)
-    optimized_mult(A[:64, :64], B[:64, :64])  # Прогрев JIT (маленький размер)
+# 3. Оптимизированный (2048x2048)
+optimized_mult(A[:64, :64], B[:64, :64])  # Прогрев JIT (маленький размер)
     
-    start = time.time()
-    C_opt = optimized_mult(A, B)
-    t_opt = time.time() - start
-    p_opt = 2*n_large**3/t_opt/1e6
-    ratio = p_opt/p_blas*100
-    print(f"3. Оптимизированный: {t_opt:.4f} сек, {p_opt:.2f} MFlops ({ratio:.1f}% от BLAS)")
-
-main()
+start = time.time()
+C_opt = optimized_mult(A, B)
+t_opt = time.time() - start
+p_opt = 2*n_large**3/t_opt/1e6
+ratio = p_opt/p_blas*100
+print(f"3. Оптимизированный: {t_opt:.4f} сек, {p_opt:.2f} MFlops ({ratio:.1f}% от BLAS)")
 print('Автор: Кочаров Арсений Андрееевич, группа: 090301-ПОВа-о25')
 
 ```
