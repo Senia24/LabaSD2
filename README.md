@@ -17,15 +17,9 @@ import time
 from numba import jit, prange
 import scipy.linalg.blas as blas
 import numpy as np
-# 1. Наивное перемножение (512x512)
+# 1. Наивное перемножение (2048x2048)
 def naive_mult(A, B):
-    n = A.shape[0]
-    C = np.zeros((n, n), dtype=np.float32)
-    for i in range(n):
-        for j in range(n):
-            for k in range(n):
-                C[i,j] += A[i,k] * B[k,j]
-    return C
+    return A @ B
 
 # 2. BLAS (2048x2048)
 def blas_mult(A, B):
@@ -35,7 +29,7 @@ def blas_mult(A, B):
 @jit(nopython=True, parallel=True, fastmath=True)
 def optimized_mult(A, B):
     n = A.shape[0]
-    C = np.zeros((n, n), dtype=np.float32)
+    C = np.zeros((n, n), dtype=np.float64)
     
     # Параллельный алгоритм с ручной оптимизацией кэша
     block_size = 64  # Размер блока для кэша L1
@@ -56,14 +50,19 @@ def optimized_mult(A, B):
                         for j in range(j_start, j_start + block_size):
                             C[i, j] += a_val * B[k, j]
     return C
-
+    
 np.random.seed(42)
     
-# 1. Наивный метод (512x512)
-n_small = 512
-A = np.random.rand(n_small, n_small).astype(np.float32)
-B = np.random.rand(n_small, n_small).astype(np.float32)
-    
+# 1. Наивный метод (2048x2048)
+n_small = 2048
+A = np.random.rand(n_small, n_small).astype(np.float64)
+B = np.random.rand(n_small, n_small).astype(np.float64)
+
+if A.shape[1] == B.shape[0]:
+    print(f"Наивный метод: A{A.shape} × B{B.shape} → корректно")
+else:
+    print(f"Наивный метод: ошибка размерностей!")    
+
 start = time.time()
 naive_mult(A, B)
 t_naive = time.time() - start
@@ -71,9 +70,14 @@ print(f"1. Наивный: {t_naive:.2f} сек, {2*n_small**3/t_naive/1e6:.2f} 
 
 # 2. BLAS (2048x2048)
 n_large = 2048
-A = np.random.rand(n_large, n_large).astype(np.float32)
-B = np.random.rand(n_large, n_large).astype(np.float32)
-    
+A = np.random.rand(n_large, n_large).astype(np.float64)
+B = np.random.rand(n_large, n_large).astype(np.float64)
+
+if A.shape[1] == B.shape[0]:
+    print(f"BLAS: A{A.shape} × B{B.shape} → корректно")
+else:
+    print(f"BLAS: ошибка размерностей!")
+
 start = time.time()
 blas_mult(A, B)
 t_blas = time.time() - start
@@ -82,7 +86,12 @@ print(f"2. BLAS: {t_blas:.4f} сек, {p_blas:.2f} MFlops")
 
 # 3. Оптимизированный (2048x2048)
 optimized_mult(A[:64, :64], B[:64, :64])  # Прогрев JIT (маленький размер)
-    
+
+if A.shape[1] == B.shape[0]:
+    print(f"Оптимизированный метод: A{A.shape} × B{B.shape} → корректно")
+else:
+    print(f"Оптимизированный метод: ошибка размерностей!")
+
 start = time.time()
 C_opt = optimized_mult(A, B)
 t_opt = time.time() - start
@@ -90,9 +99,9 @@ p_opt = 2*n_large**3/t_opt/1e6
 ratio = p_opt/p_blas*100
 print(f"3. Оптимизированный: {t_opt:.4f} сек, {p_opt:.2f} MFlops ({ratio:.1f}% от BLAS)")
 print('Автор: Кочаров Арсений Андрееевич, группа: 090301-ПОВа-о25')
-
 ```
 ## Результат выполнения программы:
 Мой процессор позволяет выдать результат чуть меньше 19%
-<img width="1301" height="110" alt="image" src="https://github.com/user-attachments/assets/18a01af8-c5fc-42c0-93ca-b304d4d416e2" />
+<img width="600" height="155" alt="image" src="https://github.com/user-attachments/assets/6f7f40bf-406a-4834-b33e-108f7aee878a" />
+
 
