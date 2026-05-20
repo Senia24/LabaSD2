@@ -29,7 +29,7 @@ def naive_mult(A, B):
 
 # 2. BLAS (2048x2048)
 def blas_mult(A, B):
-    return blas.sgemm(1.0, A, B)
+    return blas.dgemm(1.0, A, B)
 
 # 3. Оптимизированный метод (2048x2048) - гарантировано >30% от BLAS
 @jit(nopython=True, parallel=True, fastmath=True)
