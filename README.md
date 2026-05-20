@@ -16,7 +16,7 @@
 import time
 from numba import jit, prange
 import scipy.linalg.blas as blas
-import np as np
+import numpy as np
 # 1. Наивное перемножение (512x512)
 def naive_mult(A, B):
     n = A.shape[0]
